@@ -1,73 +1,71 @@
-name: Brother-X-Final-PC-Fixed
+name: Brother-X-72H-Final
 
 on:
   workflow_dispatch:
 
 env:
+  # Formatting fixed for Line 12 area
   WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg"
   KALI_URL: "https://aka.ms/wsl-kali-linux-new"
   MINECRAFT_URL: "https://launcher.mojang.com/download/MinecraftInstaller.msi"
 
 jobs:
-  beast-rdp:
+  rdp-process:
     runs-on: windows-latest
-    [span_1](start_span)timeout-minutes: 4320 # 72 Hours[span_1](end_span)
+    [span_2](start_span)timeout-minutes: 4320  # 72 Hours[span_2](end_span)
 
     steps:
-      - name: 🚀 1. Turbo Performance & Legacy Gaming
+      - name: 🚀 1. Performance Boost & Admin Access
         shell: pwsh
         run: |
           Set-MpPreference -DisableRealtimeMonitoring $true
           powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
           powercfg /s e9a42b02-d5df-448d-aa00-03f14749eb61
-          # [span_2](start_span)Enable DirectPlay for older games[span_2](end_span)
+          # Enable Legacy Gaming Components
           dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
 
-      - name: 🔊 2. Real Audio & Graphics Setup
+      - name: 🔊 2. Real PC Audio & Graphics
         shell: pwsh
         run: |
           choco install vb-cable directx vcredist-all opengl-utility -y --no-progress
-          [span_3](start_span)Set-Service -Name TermService -StartupType Automatic[span_3](end_span)
+          Set-Service -Name TermService -StartupType Automatic
 
-      - name: 🎮 3. Ultimate Gaming & Coding Suite
+      - name: 🎮 3. Pro Gaming & Coding Suite
         shell: pwsh
         run: |
           choco install steam epicgameslauncher discord vscode git python nodejs-lts -y --no-progress
           Invoke-WebRequest -Uri $env:MINECRAFT_URL -OutFile "C:\Users\Public\MinecraftInstaller.msi"
           Start-Process msiexec.exe -ArgumentList "/i C:\Users\Public\MinecraftInstaller.msi /quiet" -Wait
 
-      - name: 🐉 4. WSL Kali Linux Pro
+      - name: 🐉 4. WSL Kali Linux Setup
         shell: pwsh
         run: |
           dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
           Invoke-WebRequest -Uri $env:KALI_URL -OutFile "C:\Users\Public\kali.appx"
           Add-AppxPackage -Path "C:\Users\Public\kali.appx"
 
-      - name: 🔐 5. User Creation (Admin) & Wallpaper
+      - name: 🔐 5. User Creation & Gojo Wallpaper
         shell: pwsh
         env:
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
         run: |
           $user = "adminr"
-          $plainPassword = $Env:ADMIN_PASS
-          $pw = ConvertTo-SecureString $plainPassword -AsPlainText -Force
+          $plainPass = $Env:ADMIN_PASS
+          $secPass = ConvertTo-SecureString $plainPass -AsPlainText -Force
           
-          # [span_4](start_span)Force create user with admin rights[span_4](end_span)
+          # Force Admin User Creation
           if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
-            New-LocalUser -Name $user -Password $pw -FullName "Brother-X God" -Description "Power User" -ErrorAction Stop
-            Add-LocalGroupMember -Group Administrators -Member $user
-          } else {
-            $u = Get-LocalUser -Name $user
-            $u | Set-LocalUser -Password $pw
+            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God" -Description "Power User"
+            [span_3](start_span)Add-LocalGroupMember -Group Administrators -Member $user[span_3](end_span)
           }
-
-          # [span_5](start_span)Auto-Logon Registry[span_5](end_span)
+          
+          # Auto-Logon Registry for "Real PC" Feel
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
-          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $plainPassword
+          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $plainPass
           Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
           
-          # [span_6](start_span)Gojo Wallpaper[span_6](end_span)
+          # Wallpaper Download
           Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
 
       - name: 🛰️ 6. Tailscale & 72-Hour Keep Alive
@@ -76,9 +74,9 @@ jobs:
           TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
         run: |
           choco install tailscale -y --no-progress
-          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-pc"
-          [span_7](start_span)$end = (Get-Date).AddHours(72)[span_7](end_span)
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-god-pc"
+          [span_4](start_span)$end = (Get-Date).AddHours(72)[span_4](end_span)
           while ((Get-Date) -lt $end) {
-            Write-Host "PC Live: $((Get-Date).ToString())"
+            Write-Host "PC Status: Active | User: adminr | $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
           }
