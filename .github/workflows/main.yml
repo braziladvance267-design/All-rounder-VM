@@ -1,4 +1,4 @@
-name: Brother-X-Real-PC-Experience
+name: Brother-X-Final-PC
 
 on:
   workflow_dispatch:
@@ -9,58 +9,41 @@ env:
   MINECRAFT_URL: "https://launcher.mojang.com/download/MinecraftInstaller.msi"
 
 jobs:
-  real-pc-beast:
+  beast-rdp:
     runs-on: windows-latest
-    [span_0](start_span)timeout-minutes: 4320 # 72 Hours (As per your Brother-X method)[span_0](end_span)
+    timeout-minutes: 4320
 
     steps:
-      - name: 🚀 1. God-Level Performance & Admin Setup
+      - name: 🚀 1. Turbo Performance & Admin
         shell: pwsh
         run: |
-          # Disable Defender & Security for raw CPU power
           Set-MpPreference -DisableRealtimeMonitoring $true
-          Set-MpPreference -DisableBehaviorMonitoring $true
-          # Ultimate Power Plan & Visual Effects for Real PC feel
           powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
           powercfg /s e9a42b02-d5df-448d-aa00-03f14749eb61
           reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f
 
-      - name: 🔊 2. Real PC Audio & Graphics (No-Lag Fix)
+      - name: 🔊 2. Audio, Graphics & Legacy Gaming
         shell: pwsh
         run: |
-          # Install Audio & Graphics Drivers
           choco install vb-cable directx vcredist-all opengl-utility -y --no-progress
-          # Enable Legacy Components for Retro Games
           dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
-          # Fix for RDP Sound
           Set-Service -Name TermService -StartupType Automatic
 
-      - name: 🎮 3. Pro Gaming Suite (Minecraft + Steam + Discord)
+      - name: 🎮 3. Ultimate Gaming & Coding Suite
         shell: pwsh
         run: |
-          # Essential Gaming Apps
-          choco install steam epicgameslauncher discord -y --no-progress
-          # Minecraft Setup
+          choco install steam epicgameslauncher discord vscode git python nodejs-lts -y --no-progress
           Invoke-WebRequest -Uri $env:MINECRAFT_URL -OutFile "C:\Users\Public\MinecraftInstaller.msi"
           Start-Process msiexec.exe -ArgumentList "/i C:\Users\Public\MinecraftInstaller.msi /quiet" -Wait
 
-      - name: 💻 4. Pro Coding & WSL (Kali Linux)
+      - name: 🐉 4. WSL Kali Linux Pro
         shell: pwsh
         run: |
-          # Enable WSL1 & Install Kali
           dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
           Invoke-WebRequest -Uri $env:KALI_URL -OutFile "C:\Users\Public\kali.appx"
           Add-AppxPackage -Path "C:\Users\Public\kali.appx"
-          # Dev Tools: VSCode, Git, Python, Node
-          choco install vscode git python nodejs-lts -y --no-progress
 
-      - name: 📱 5. Android Emulator & Editing (Full Suite)
-        shell: pwsh
-        run: |
-          # Best for Cloud: LDPlayer + OBS + VLC
-          choco install ldplayer obs-studio vlc audacity -y --no-progress
-
-      - name: 🔐 6. User, Wallpaper & AutoLogon (Brother-X Style)
+      - name: 🔐 5. User Creation & Auto-Wallpaper Script
         shell: pwsh
         env:
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
@@ -71,23 +54,23 @@ jobs:
             New-LocalUser -Name $user -Password $pw -FullName "Brother-X God"
             Add-LocalGroupMember -Group Administrators -Member $user
           }
-          # Registry for "Real PC" Auto-Login
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
           Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $Env:ADMIN_PASS
-          Set-ItemProperty -Value "1" -Name "AutoAdminLogon" -Path $reg
-          # [span_1](start_span)Gojo Wallpaper[span_1](end_span)
+          Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
           Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
+          $wallScript = "C:\Users\Public\SetWall.ps1"
+          "@('Set-ItemProperty -Path ''HKCU:\Control Panel\Desktop'' -Name Wallpaper -Value ''C:\Users\Public\gojo.jpg''', 'RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters') | Set-Content -Path $wallScript" | iex
 
-      - name: 🛰️ 7. Connect via Tailscale & Stay Alive
+      - name: 🛰️ 6. Tailscale & 72-Hour Keep Alive
         shell: pwsh
         env:
           TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
         run: |
           choco install tailscale -y --no-progress
-          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-god-pc"
-          [span_2](start_span)$end = (Get-Date).AddHours(72) # Keeping it 72 as per your request[span_2](end_span)
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-pc"
+          $end = (Get-Date).AddHours(72)
           while ((Get-Date) -lt $end) {
-            Write-Host "God-Mode PC is Online! $((Get-Date).ToString())"
+            Write-Host "PC Live: $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
           }
