@@ -1,4 +1,4 @@
-name: Brother-X-Final-PC
+name: Brother-X-Final-PC-Fixed
 
 on:
   workflow_dispatch:
@@ -11,23 +11,23 @@ env:
 jobs:
   beast-rdp:
     runs-on: windows-latest
-    timeout-minutes: 4320
+    [span_1](start_span)timeout-minutes: 4320 # 72 Hours[span_1](end_span)
 
     steps:
-      - name: 🚀 1. Turbo Performance & Admin
+      - name: 🚀 1. Turbo Performance & Legacy Gaming
         shell: pwsh
         run: |
           Set-MpPreference -DisableRealtimeMonitoring $true
           powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
           powercfg /s e9a42b02-d5df-448d-aa00-03f14749eb61
-          reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f
+          # [span_2](start_span)Enable DirectPlay for older games[span_2](end_span)
+          dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
 
-      - name: 🔊 2. Audio, Graphics & Legacy Gaming
+      - name: 🔊 2. Real Audio & Graphics Setup
         shell: pwsh
         run: |
           choco install vb-cable directx vcredist-all opengl-utility -y --no-progress
-          dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
-          Set-Service -Name TermService -StartupType Automatic
+          [span_3](start_span)Set-Service -Name TermService -StartupType Automatic[span_3](end_span)
 
       - name: 🎮 3. Ultimate Gaming & Coding Suite
         shell: pwsh
@@ -43,24 +43,32 @@ jobs:
           Invoke-WebRequest -Uri $env:KALI_URL -OutFile "C:\Users\Public\kali.appx"
           Add-AppxPackage -Path "C:\Users\Public\kali.appx"
 
-      - name: 🔐 5. User Creation & Auto-Wallpaper Script
+      - name: 🔐 5. User Creation (Admin) & Wallpaper
         shell: pwsh
         env:
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
         run: |
           $user = "adminr"
-          $pw = ConvertTo-SecureString $Env:ADMIN_PASS -AsPlainText -Force
+          $plainPassword = $Env:ADMIN_PASS
+          $pw = ConvertTo-SecureString $plainPassword -AsPlainText -Force
+          
+          # [span_4](start_span)Force create user with admin rights[span_4](end_span)
           if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
-            New-LocalUser -Name $user -Password $pw -FullName "Brother-X God"
+            New-LocalUser -Name $user -Password $pw -FullName "Brother-X God" -Description "Power User" -ErrorAction Stop
             Add-LocalGroupMember -Group Administrators -Member $user
+          } else {
+            $u = Get-LocalUser -Name $user
+            $u | Set-LocalUser -Password $pw
           }
+
+          # [span_5](start_span)Auto-Logon Registry[span_5](end_span)
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
-          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $Env:ADMIN_PASS
+          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $plainPassword
           Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
+          
+          # [span_6](start_span)Gojo Wallpaper[span_6](end_span)
           Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
-          $wallScript = "C:\Users\Public\SetWall.ps1"
-          "@('Set-ItemProperty -Path ''HKCU:\Control Panel\Desktop'' -Name Wallpaper -Value ''C:\Users\Public\gojo.jpg''', 'RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters') | Set-Content -Path $wallScript" | iex
 
       - name: 🛰️ 6. Tailscale & 72-Hour Keep Alive
         shell: pwsh
@@ -69,7 +77,7 @@ jobs:
         run: |
           choco install tailscale -y --no-progress
           & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-pc"
-          $end = (Get-Date).AddHours(72)
+          [span_7](start_span)$end = (Get-Date).AddHours(72)[span_7](end_span)
           while ((Get-Date) -lt $end) {
             Write-Host "PC Live: $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
