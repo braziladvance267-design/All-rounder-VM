@@ -1,49 +1,66 @@
-name: Ultimate-Beast-RDP
+name: Brother-X-Real-PC-Experience
 
 on:
   workflow_dispatch:
 
 env:
   WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg"
-  LOG_DIR: "C:\\Users\\Public\\rdp_setup_logs"
+  KALI_URL: "https://aka.ms/wsl-kali-linux-new"
+  MINECRAFT_URL: "https://launcher.mojang.com/download/MinecraftInstaller.msi"
 
 jobs:
-  rdp-run:
+  real-pc-beast:
     runs-on: windows-latest
-    timeout-minutes: 360
+    [span_0](start_span)timeout-minutes: 4320 # 72 Hours (As per your Brother-X method)[span_0](end_span)
 
     steps:
-      - name: 1. Prepare Environment & Logging
+      - name: 🚀 1. God-Level Performance & Admin Setup
         shell: pwsh
         run: |
-          New-Item -Path $env:LOG_DIR -ItemType Directory -Force | Out-Null
-          "Setup Started" | Out-File -FilePath (Join-Path $env:LOG_DIR "init.log")
-
-      - name: 2. Beast Performance & Gaming Drivers
-        shell: pwsh
-        run: |
+          # Disable Defender & Security for raw CPU power
           Set-MpPreference -DisableRealtimeMonitoring $true
-          powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-          choco install directx vcredist-all vb-cable -y --no-progress
+          Set-MpPreference -DisableBehaviorMonitoring $true
+          # Ultimate Power Plan & Visual Effects for Real PC feel
+          powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
+          powercfg /s e9a42b02-d5df-448d-aa00-03f14749eb61
+          reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f
 
-      - name: 3. Enable WSL & Hyper-V (Features)
+      - name: 🔊 2. Real PC Audio & Graphics (No-Lag Fix)
         shell: pwsh
         run: |
+          # Install Audio & Graphics Drivers
+          choco install vb-cable directx vcredist-all opengl-utility -y --no-progress
+          # Enable Legacy Components for Retro Games
+          dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
+          # Fix for RDP Sound
+          Set-Service -Name TermService -StartupType Automatic
+
+      - name: 🎮 3. Pro Gaming Suite (Minecraft + Steam + Discord)
+        shell: pwsh
+        run: |
+          # Essential Gaming Apps
+          choco install steam epicgameslauncher discord -y --no-progress
+          # Minecraft Setup
+          Invoke-WebRequest -Uri $env:MINECRAFT_URL -OutFile "C:\Users\Public\MinecraftInstaller.msi"
+          Start-Process msiexec.exe -ArgumentList "/i C:\Users\Public\MinecraftInstaller.msi /quiet" -Wait
+
+      - name: 💻 4. Pro Coding & WSL (Kali Linux)
+        shell: pwsh
+        run: |
+          # Enable WSL1 & Install Kali
           dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-          dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-          dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart
+          Invoke-WebRequest -Uri $env:KALI_URL -OutFile "C:\Users\Public\kali.appx"
+          Add-AppxPackage -Path "C:\Users\Public\kali.appx"
+          # Dev Tools: VSCode, Git, Python, Node
+          choco install vscode git python nodejs-lts -y --no-progress
 
-      - name: 4. Coding & Programming Suite
+      - name: 📱 5. Android Emulator & Editing (Full Suite)
         shell: pwsh
         run: |
-          choco install git python nodejs-lts openjdk vscode -y --no-progress
+          # Best for Cloud: LDPlayer + OBS + VLC
+          choco install ldplayer obs-studio vlc audacity -y --no-progress
 
-      - name: 5. Android Emulator & Media Tools
-        shell: pwsh
-        run: |
-          choco install ldplayer obs-studio vlc -y --no-progress
-
-      - name: 6. User Creation & AutoLogon
+      - name: 🔐 6. User, Wallpaper & AutoLogon (Brother-X Style)
         shell: pwsh
         env:
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
@@ -51,34 +68,26 @@ jobs:
           $user = "adminr"
           $pw = ConvertTo-SecureString $Env:ADMIN_PASS -AsPlainText -Force
           if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
-            New-LocalUser -Name $user -Password $pw -FullName "Beast Admin" -Description "Power User"
+            New-LocalUser -Name $user -Password $pw -FullName "Brother-X God"
             Add-LocalGroupMember -Group Administrators -Member $user
           }
+          # Registry for "Real PC" Auto-Login
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
           Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $Env:ADMIN_PASS
           Set-ItemProperty -Value "1" -Name "AutoAdminLogon" -Path $reg
-
-      - name: 7. Download Wallpaper & Setup RDP
-        shell: pwsh
-        run: |
+          # [span_1](start_span)Gojo Wallpaper[span_1](end_span)
           Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: 8. Tailscale Connection
+      - name: 🛰️ 7. Connect via Tailscale & Stay Alive
         shell: pwsh
         env:
           TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
         run: |
           choco install tailscale -y --no-progress
-          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "beast-rdp"
-
-      - name: 9. Keep Alive Loop (6 Hours)
-        shell: pwsh
-        run: |
-          $end = (Get-Date).AddHours(6)
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-god-pc"
+          [span_2](start_span)$end = (Get-Date).AddHours(72) # Keeping it 72 as per your request[span_2](end_span)
           while ((Get-Date) -lt $end) {
-            Write-Host "Beast RDP is Running... $((Get-Date).ToString())"
+            Write-Host "God-Mode PC is Online! $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
           }
