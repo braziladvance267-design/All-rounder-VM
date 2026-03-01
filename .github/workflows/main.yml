@@ -1,70 +1,70 @@
-name: Brother-X-No-Error-Final
+name: Brother-X-Auto-God-PC
 
 on:
   workflow_dispatch:
 
-env:
-  WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg"
-  KALI_URL: "https://aka.ms/wsl-kali-linux-new"
-
 jobs:
   beast-rdp:
     runs-on: windows-latest
-    timeout-minutes: 4320
+    timeout-minutes: 4320 # 72 Hours
 
     steps:
-      - name: 🚀 1. Performance & Graphics Fix
+      - name: 🚀 1. Turbo Performance & Gaming Fix
         shell: pwsh
         run: |
           Set-MpPreference -DisableRealtimeMonitoring $true
           powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-          # OpenGL utility hata kar direct graphics runtimes install karenge
+          # Essential Runtimes for Gaming & Audio
           choco install directx vcredist-all vb-cable -y --no-progress
-
-      - name: 🛠️ 2. Enable WSL (No Hyper-V Error)
-        shell: pwsh
-        run: |
-          # Sirf WSL enable karenge kyunki Hyper-V GitHub par error deta hai
-          dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
           dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
 
-      - name: 🎮 3. Silent Gaming & Coding Apps
+      - name: 🎮 2. Pro Gaming & Coding Suite
         shell: pwsh
         run: |
-          # Stable packages only
+          # Gaming & Dev tools in one go
           choco install steam epicgameslauncher discord vscode git python nodejs-lts vlc obs-studio -y --no-progress
           Invoke-WebRequest -Uri "https://launcher.mojang.com/download/MinecraftInstaller.msi" -OutFile "C:\mc.msi"
           msiexec.exe /i "C:\mc.msi" /qn /norestart
 
-      - name: 🐉 4. Kali Linux Auto-Setup
+      - name: 🐉 3. WSL Kali Linux (Pro Setup)
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri $env:KALI_URL -OutFile "C:\kali.appx"
+          dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+          Invoke-WebRequest -Uri "https://aka.ms/wsl-kali-linux-new" -OutFile "C:\kali.appx"
           Add-AppxPackage -Path "C:\kali.appx"
 
-      - name: 🔐 5. Admin User & Password Fix
+      - name: 🔐 4. Auto-Generate Secure Admin User
         shell: pwsh
-        env:
-          ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
         run: |
           $user = "adminr"
-          # Password handling fixed for special characters
-          $plainPass = "$Env:ADMIN_PASS"
-          $secPass = ConvertTo-SecureString $plainPass -AsPlainText -Force
+          # Generating a Microsoft-compliant strong password
+          $dynamicPass = "GojoSatoru@99" + (Get-Random -Minimum 100 -Maximum 999) + "!"
+          $secPass = ConvertTo-SecureString $dynamicPass -AsPlainText -Force
           
           if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
-            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God" -Description "Pro User"
+            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God" -Description "Full Admin Access"
             Add-LocalGroupMember -Group Administrators -Member $user
           }
           
-          # Registry Auto-Logon
+          # Auto-Logon Registry
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
-          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $plainPass
+          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $dynamicPass
           Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
-          Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
+          
+          # Final Credentials Output (Visible in Logs)
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "      BROTHER-X RDP CREDENTIALS        " -ForegroundColor Yellow
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "USERNAME: $user" -ForegroundColor Green
+          Write-Host "PASSWORD: $dynamicPass" -ForegroundColor Green
+          Write-Host "========================================" -ForegroundColor Cyan
+          
+          # Save to a file for user safety
+          $dynamicPass | Out-File -FilePath "C:\Users\Public\Credentials.txt"
+          Invoke-WebRequest -Uri "https://i.imgur.com/Sq0YyOV.jpeg" -OutFile "C:\Users\Public\gojo.jpg"
 
-      - name: 🛰️ 6. Tailscale & Keep Alive
+      - name: 🛰️ 5. Tailscale & 72H Keep Alive
         shell: pwsh
         env:
           TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
@@ -73,6 +73,6 @@ jobs:
           & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-pc"
           $end = (Get-Date).AddHours(72)
           while ((Get-Date) -lt $end) {
-            Write-Host "PC Live & Beast Mode Active | $((Get-Date).ToString())"
+            Write-Host "God-Mode PC Status: Online | $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
           }
