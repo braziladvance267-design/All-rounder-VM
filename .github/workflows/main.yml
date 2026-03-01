@@ -1,83 +1,84 @@
-name: Beast-Ultimate-All-Rounder-RDP
+name: Ultimate-Beast-RDP
 
 on:
   workflow_dispatch:
 
 env:
-  [span_3](start_span)WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg" # Gojo Wallpaper from your file[span_3](end_span)
+  WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg"
   LOG_DIR: "C:\\Users\\Public\\rdp_setup_logs"
 
 jobs:
-  beast-rdp:
+  rdp-run:
     runs-on: windows-latest
-    [span_4](start_span)timeout-minutes: 360 # GitHub free limit is 6 hours, 4320 minutes won't work on free tier[span_4](end_span)
+    timeout-minutes: 360
 
     steps:
-      - name: 🚀 1. Super-Power Performance & Graphics
+      - name: 1. Prepare Environment & Logging
         shell: pwsh
         run: |
-          # [span_5](start_span)Disable Defender to save CPU for Gaming[span_5](end_span)
-          Set-MpPreference -DisableRealtimeMonitoring $true
-          # High Performance Power Plan
-          powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-          # [span_6](start_span)Install DirectX, VCRedist, and GPU Tools[span_6](end_span)
-          choco install directx vcredist-all opengl-utility -y --no-progress
+          New-Item -Path $env:LOG_DIR -ItemType Directory -Force | Out-Null
+          "Setup Started" | Out-File -FilePath (Join-Path $env:LOG_DIR "init.log")
 
-      - name: 💻 2. Full Coding & Programming Suite
+      - name: 2. Beast Performance & Gaming Drivers
         shell: pwsh
         run: |
-          # [span_7](start_span)WSL, Git, Python, Node, Java, and VS Code[span_7](end_span)
-          choco install git python nodejs-lts openjdk vscode -y --no-progress
-          # [span_8](start_span)Enable WSL Feature (Requires restart for full effect, but command added)[span_8](end_span)
+          Set-MpPreference -DisableRealtimeMonitoring $true
+          powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+          choco install directx vcredist-all vb-cable -y --no-progress
+
+      - name: 3. Enable WSL & Hyper-V (Features)
+        shell: pwsh
+        run: |
           dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
           dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-
-      - name: 🎬 3. Editing & Streaming Power
-        shell: pwsh
-        run: |
-          # [span_9](start_span)OBS Studio for recording, VLC, and Audacity for sound[span_9](end_span)
-          choco install obs-studio vlc audacity shortcut -y --no-progress
-          # Virtual Audio Cable for RDP Sound fix
-          choco install vb-cable -y --no-progress
-
-      - name: 📱 4. Android Emulator & Hyper-V Setup
-        shell: pwsh
-        run: |
-          # Enable Hyper-V (Command added as requested)
           dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart
-          # [span_10](start_span)LDPlayer (Best for cloud environment)[span_10](end_span)
-          choco install ldplayer -y --no-progress
 
-      - name: 🔐 5. User, Wallpaper & Auto-Logon (Brother-X Style)
+      - name: 4. Coding & Programming Suite
+        shell: pwsh
+        run: |
+          choco install git python nodejs-lts openjdk vscode -y --no-progress
+
+      - name: 5. Android Emulator & Media Tools
+        shell: pwsh
+        run: |
+          choco install ldplayer obs-studio vlc -y --no-progress
+
+      - name: 6. User Creation & AutoLogon
         shell: pwsh
         env:
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
         run: |
-          [span_11](start_span)$user = "adminr" # Username from your file[span_11](end_span)
+          $user = "adminr"
           $pw = ConvertTo-SecureString $Env:ADMIN_PASS -AsPlainText -Force
-          [span_12](start_span)New-LocalUser -Name $user -Password $pw -FullName "Beast Admin" -Description "Power User"[span_12](end_span)
-          [span_13](start_span)Add-LocalGroupMember -Group Administrators -Member $user[span_13](end_span)
-          
-          # [span_14](start_span)Auto-Logon Registry[span_14](end_span)
+          if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
+            New-LocalUser -Name $user -Password $pw -FullName "Beast Admin" -Description "Power User"
+            Add-LocalGroupMember -Group Administrators -Member $user
+          }
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
           Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $Env:ADMIN_PASS
-          Set-ItemProperty -Path $reg -Name "AutoAdminLogon" -Value "1"
+          Set-ItemProperty -Value "1" -Name "AutoAdminLogon" -Path $reg
 
-          # [span_15](start_span)Wallpaper Download[span_15](end_span)
+      - name: 7. Download Wallpaper & Setup RDP
+        shell: pwsh
+        run: |
           Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - name: 🛰️ 6. Tailscale & Keep Alive
+      - name: 8. Tailscale Connection
         shell: pwsh
         env:
           TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
         run: |
-          [span_16](start_span)choco install tailscale -y --no-progress[span_16](end_span)
-          [span_17](start_span)& "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "beast-ultimate"[span_17](end_span)
-          
-          # [span_18](start_span)6 Hour Loop[span_18](end_span)
+          choco install tailscale -y --no-progress
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "beast-rdp"
+
+      - name: 9. Keep Alive Loop (6 Hours)
+        shell: pwsh
+        run: |
           $end = (Get-Date).AddHours(6)
           while ((Get-Date) -lt $end) {
-            Write-Host "Beast RDP is Running... $(Get-Date)"
+            Write-Host "Beast RDP is Running... $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
           }
