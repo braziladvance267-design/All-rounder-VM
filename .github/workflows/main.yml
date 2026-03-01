@@ -1,7 +1,11 @@
-name: Brother-X-Final-Trigger
+name: Brother-X-No-Error-Final
 
 on:
-  workflow_dispatch: # Isse "Run Workflow" ka button dikhega
+  workflow_dispatch:
+
+env:
+  WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg"
+  KALI_URL: "https://aka.ms/wsl-kali-linux-new"
 
 jobs:
   beast-rdp:
@@ -9,62 +13,58 @@ jobs:
     timeout-minutes: 4320
 
     steps:
-      - name: 🚀 1. Turbo Mode & Admin Check
+      - name: 🚀 1. Performance & Graphics Fix
         shell: pwsh
         run: |
-          # Disable Defender to save CPU
           Set-MpPreference -DisableRealtimeMonitoring $true
-          # High Performance Plan
           powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-          # Enable Legacy Gaming
+          # OpenGL utility hata kar direct graphics runtimes install karenge
+          choco install directx vcredist-all vb-cable -y --no-progress
+
+      - name: 🛠️ 2. Enable WSL (No Hyper-V Error)
+        shell: pwsh
+        run: |
+          # Sirf WSL enable karenge kyunki Hyper-V GitHub par error deta hai
+          dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
           dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
 
-      - name: 🔊 2. Sound & Graphics Setup
+      - name: 🎮 3. Silent Gaming & Coding Apps
         shell: pwsh
         run: |
-          # Direct choco install is 100% stable
-          choco install vb-cable directx vcredist-all opengl-utility -y --no-progress
-          Set-Service -Name TermService -StartupType Automatic
-
-      - name: 🎮 3. All-In-One Gaming & Coding Suite
-        shell: pwsh
-        run: |
-          # Essential Apps for Beast RDP
+          # Stable packages only
           choco install steam epicgameslauncher discord vscode git python nodejs-lts vlc obs-studio -y --no-progress
-          # Minecraft Silent Setup
           Invoke-WebRequest -Uri "https://launcher.mojang.com/download/MinecraftInstaller.msi" -OutFile "C:\mc.msi"
           msiexec.exe /i "C:\mc.msi" /qn /norestart
 
-      - name: 🐉 4. WSL Kali Linux (Pro Version)
+      - name: 🐉 4. Kali Linux Auto-Setup
         shell: pwsh
         run: |
-          # Enable WSL1 without restart
-          dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-          Invoke-WebRequest -Uri "https://aka.ms/wsl-kali-linux-new" -OutFile "C:\kali.appx"
+          Invoke-WebRequest -Uri $env:KALI_URL -OutFile "C:\kali.appx"
           Add-AppxPackage -Path "C:\kali.appx"
 
-      - name: 🔐 5. Admin User & Wallpaper
+      - name: 🔐 5. Admin User & Password Fix
         shell: pwsh
         env:
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
-          WALLPAPER_URL: "https://i.imgur.com/Sq0YyOV.jpeg"
         run: |
           $user = "adminr"
-          $plainPass = $Env:ADMIN_PASS
+          # Password handling fixed for special characters
+          $plainPass = "$Env:ADMIN_PASS"
           $secPass = ConvertTo-SecureString $plainPass -AsPlainText -Force
-          # Create Admin User
+          
           if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
-            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God"
+            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God" -Description "Pro User"
             Add-LocalGroupMember -Group Administrators -Member $user
           }
-          # Registry for Auto-Logon
+          
+          # Registry Auto-Logon
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
           Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $plainPass
           Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
-          Invoke-WebRequest -Uri $Env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
+          Invoke-WebRequest -Uri $env:WALLPAPER_URL -OutFile "C:\Users\Public\gojo.jpg"
 
-      - name: 🛰️ 6. Tailscale & 72H Keep Alive
+      - name: 🛰️ 6. Tailscale & Keep Alive
         shell: pwsh
         env:
           TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
@@ -73,6 +73,6 @@ jobs:
           & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-pc"
           $end = (Get-Date).AddHours(72)
           while ((Get-Date) -lt $end) {
-            Write-Host "PC Status: Online & Beast Mode Active | $((Get-Date).ToString())"
+            Write-Host "PC Live & Beast Mode Active | $((Get-Date).ToString())"
             Start-Sleep -Seconds 60
           }
