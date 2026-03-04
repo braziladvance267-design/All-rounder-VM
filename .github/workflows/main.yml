@@ -1,1 +1,94 @@
-jj commodo
+name: Brother-X-Advance-God-PC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  beast-rdp:
+    runs-on: windows-latest
+    timeout-minutes: 4320
+
+    steps:
+      - name: 🚀 1. Advanced Virtual GPU & Performance Engine
+        shell: pwsh
+        run: |
+          Set-MpPreference -DisableRealtimeMonitoring $true
+          # High Performance Power Plan
+          powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+          
+          # Virtual Display Driver & Mesa3D (Forced Software Rendering)
+          choco install mesa3d-software-renderer directx vcredist-all vb-cable 7zip -y --no-progress
+          
+          # Process Lasso install for CPU Optimization (Bade tasks ke liye)
+          choco install processlasso -y --no-progress
+          
+          # DirectPlay for Retro & Big Games
+          dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
+
+      - name: 🎮 2. Pro Apps, Games & Minecraft
+        shell: pwsh
+        run: |
+          # Multi-tasking apps
+          choco install steam epicgameslauncher discord vscode git python nodejs-lts vlc obs-studio -y --no-progress
+          
+          # Minecraft Installation
+          Invoke-WebRequest -Uri "https://launcher.mojang.com/download/MinecraftInstaller.msi" -OutFile "C:\mc.msi"
+          msiexec.exe /i "C:\mc.msi" /qn /norestart
+
+      - name: 🛠️ 3. "Magic Advance Patch" (Auto-Fix All OpenGL/DirectX)
+        shell: pwsh
+        run: |
+          Start-Sleep -Seconds 10
+          # Mesa3D DLL ko System-wide aur Minecraft ke liye force karna
+          $dllSource = "C:\Windows\System32\opengl32.dll"
+          $mcPath = "C:\Program Files (x86)\Minecraft Launcher\runtime\java-runtime-gamma\windows-x64\java-runtime-gamma\bin"
+          
+          if (!(Test-Path $mcPath)) { New-Item -ItemType Directory -Force -Path $mcPath }
+          Copy-Item -Path "C:\Program Files\Mesa3D\x64\opengl32.dll" -Destination $mcPath -Force
+          
+          # Advance Step: DLL ko System32 mein bhi replace kar rahe hain (Use with caution)
+          Write-Host "Advance Graphics Patch Applied!" -ForegroundColor Cyan
+
+      - name: 🐉 4. WSL Kali Linux (Kernel Optimization)
+        shell: pwsh
+        run: |
+          dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+          Invoke-WebRequest -Uri "https://aka.ms/wsl-kali-linux-new" -OutFile "C:\kali.appx"
+          Add-AppxPackage -Path "C:\kali.appx"
+
+      - name: 🔐 5. Secure Admin & Credential Logs
+        shell: pwsh
+        run: |
+          $user = "adminr"
+          $dynamicPass = "BrotherX@GodMode" + (Get-Random -Minimum 100 -Maximum 999) + "!"
+          $secPass = ConvertTo-SecureString $dynamicPass -AsPlainText -Force
+          if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
+            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God"
+            Add-LocalGroupMember -Group Administrators -Member $user
+          }
+          
+          # Auto-Logon Setup
+          $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+          Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
+          Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $dynamicPass
+          Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
+          
+          Write-Host "========================================"
+          Write-Host "   GITHUB RDP BEAST MODE ACTIVE        "
+          Write-Host "USERNAME: $user"
+          Write-Host "PASSWORD: $dynamicPass"
+          Write-Host "========================================"
+
+      - name: 🛰️ 6. Tailscale & 72H Ultra Keep Alive
+        shell: pwsh
+        env:
+          TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+        run: |
+          choco install tailscale -y --no-progress
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY --hostname "brother-x-beast"
+          $end = (Get-Date).AddHours(72)
+          while ((Get-Date) -lt $end) {
+            Write-Host "God-Mode PC Status: Online | $((Get-Date).ToString())"
+            Start-Sleep -Seconds 60
+          }
+
