@@ -14,7 +14,6 @@ jobs:
         run: |
           Set-MpPreference -DisableRealtimeMonitoring $true
           powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-          # Installing core tools
           choco install directx vcredist-all vb-cable 7zip processlasso -y --no-progress
           dism.exe /online /enable-feature /featurename:DirectPlay /all /norestart
 
@@ -25,44 +24,49 @@ jobs:
           Invoke-WebRequest -Uri "https://launcher.mojang.com/download/MinecraftInstaller.msi" -OutFile "C:\mc.msi"
           msiexec.exe /i "C:\mc.msi" /qn /norestart
 
-      - name: 🛠️ 3. "Magic Advance Patch" (Direct DLL Injection)
+      - name: 🛠️ 3. "Magic Advance Patch" (DLL Injection)
         shell: pwsh
         run: |
-          # Downloading Mesa3D DLL directly to bypass install path errors
           Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/23.1.3/mesa3d-23.1.3-release-msvc.7z" -OutFile "C:\mesa.7z"
           & "C:\Program Files\7-Zip\7z.exe" e "C:\mesa.7z" -oC:\mesa_files x64\opengl32.dll -r
-          
-          # Force copy to Minecraft Java Runtimes
           $mcPaths = @(
             "C:\Program Files (x86)\Minecraft Launcher\runtime\java-runtime-gamma\windows-x64\java-runtime-gamma\bin",
             "C:\Program Files (x86)\Minecraft Launcher\runtime\java-runtime-alpha\windows-x64\java-runtime-alpha\bin",
             "C:\Program Files (x86)\Minecraft Launcher\runtime\java-runtime-beta\windows-x64\java-runtime-beta\bin"
           )
-          
           foreach ($path in $mcPaths) {
             if (!(Test-Path $path)) { New-Item -ItemType Directory -Force -Path $path }
             Copy-Item -Path "C:\mesa_files\opengl32.dll" -Destination $path -Force
           }
           Write-Host "Advance Graphics Patch Applied Successfully!" -ForegroundColor Cyan
 
-      - name: 🔐 4. Secure Admin & Credential Logs
+      - name: 🔐 4. Secure Admin & Password Fix
         shell: pwsh
         run: |
           $user = "adminr"
-          $dynamicPass = "BrotherX@GodMode" + (Get-Random -Minimum 100 -Maximum 999) + "!"
+          # Naya super-compatible password format
+          $dynamicPass = "BrotherX" + (Get-Random -Minimum 1000 -Maximum 9999) + "God!"
           $secPass = ConvertTo-SecureString $dynamicPass -AsPlainText -Force
-          if (-not (Get-LocalUser -Name $user -ErrorAction SilentlyContinue)) {
-            New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God"
-            Add-LocalGroupMember -Group Administrators -Member $user
+          
+          # Pehle check karo agar user hai toh delete karo, phir naya banao
+          if (Get-LocalUser -Name $user -ErrorAction SilentlyContinue) {
+            Remove-LocalUser -Name $user
           }
+          
+          # Force create with complex password
+          New-LocalUser -Name $user -Password $secPass -FullName "Brother-X God" -Description "Ultimate Admin"
+          Add-LocalGroupMember -Group Administrators -Member $user
+          
           $reg = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
           Set-ItemProperty -Path $reg -Name "DefaultUserName" -Value $user
           Set-ItemProperty -Path $reg -Name "DefaultPassword" -Value $dynamicPass
           Set-ItemProperty -Name "AutoAdminLogon" -Value "1" -Path $reg
-          Write-Host "========================================"
-          Write-Host "USERNAME: $user"
-          Write-Host "PASSWORD: $dynamicPass"
-          Write-Host "========================================"
+          
+          Write-Host "========================================" -ForegroundColor Yellow
+          Write-Host "   SUCCESS! COPY THESE CREDENTIALS    " -ForegroundColor Cyan
+          Write-Host "USERNAME: $user" -ForegroundColor Green
+          Write-Host "PASSWORD: $dynamicPass" -ForegroundColor Green
+          Write-Host "========================================" -ForegroundColor Yellow
 
       - name: 🛰️ 5. Tailscale & 72H Ultra Keep Alive
         shell: pwsh
